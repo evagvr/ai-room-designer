@@ -3,7 +3,7 @@
 
 const MIN_AISLE = 0.9 // 90cm minimum circulation aisle
 
-export async function runAgent2({ room, selectedItems }) {
+export async function runAgent2({ room, selectedItems, variant = 0 }) {
   const itemsJson = selectedItems.map(item => ({
     id: item.id,
     name: item.name,
@@ -13,7 +13,10 @@ export async function runAgent2({ room, selectedItems }) {
     category: item.category,
   }))
 
-  
+  const variantInstruction = variant > 0
+    ? `This is layout variant ${variant + 1}. Create a MEANINGFULLY DIFFERENT arrangement from variant 1. Try different orientations, groupings, or furniture placement strategies.`
+    : 'This is the primary layout. Focus on optimal flow and livability.'
+
   const prompt = `You are Agent 2 of an AI interior design system — a spatial optimization expert.
 
 Room dimensions: ${room.length}m (length/X-axis) × ${room.width}m (width/Y-axis)
@@ -22,7 +25,7 @@ Minimum circulation aisle: ${MIN_AISLE}m between furniture items
 Furniture to place:
 ${JSON.stringify(itemsJson, null, 2)}
 
-
+${variantInstruction}
 
 Rules:
 1. All furniture must fit INSIDE the room (x >= 0, y >= 0, x + item_width <= ${room.length}, y + item_depth <= ${room.width})
