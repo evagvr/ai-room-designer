@@ -1,0 +1,7 @@
+.palette-selection { padding: 1rem; }
+.palettes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem; }
+.palette-card { border: 2px solid #e0e0e0; border-radius: 12px; padding: 1rem; cursor: pointer; background: white; text-align: left; transition: all 0.2s; }
+.palette-card.selected { border-color: #4a90e2; background: #f0f7ff; }
+.palette-colors { display: flex; height: 40px; border-radius: 8px; overflow: hidden; margin-bottom: 8px; }
+.palette-check { color: #4a90e2; font-weight: bold; margin-top: 4px; }
+.palette-selected-hint { margin-top: 1rem; color: #555; }

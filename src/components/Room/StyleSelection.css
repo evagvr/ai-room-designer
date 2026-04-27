@@ -1,0 +1,8 @@
+.style-selection { padding: 1rem; }
+.styles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-top: 1rem; }
+.style-card { border: 2px solid #e0e0e0; border-radius: 12px; padding: 1rem; cursor: pointer; background: white; text-align: left; transition: all 0.2s; }
+.style-card.selected { border-color: #4a90e2; background: #f0f7ff; }
+.style-swatches { display: flex; gap: 4px; margin-bottom: 8px; }
+.swatch { width: 20px; height: 20px; border-radius: 50%; }
+.style-emoji { font-size: 1.5rem; margin-bottom: 4px; }
+.style-check { color: #4a90e2; font-weight: bold; margin-top: 4px; }
