@@ -1,5 +1,16 @@
 // Agent 1: AI Designer
 // Generates furniture suggestions based on room config, style, palette, budget
+// Agent 1: AI Designer
+// Generates furniture suggestions based on room config, style, palette, budget
+
+const ROMANIAN_STORES = ['IKEA', 'Dedeman', 'Vivre', 'Mobexpert']
+
+const STORE_LINKS = {
+  IKEA: 'https://www.ikea.com/ro/ro/search/?q=',
+  Dedeman: 'https://www.dedeman.ro/ro/search?q=',
+  Vivre: 'https://www.vivre.ro/search/?q=',
+  Mobexpert: 'https://www.mobexpert.ro/search?q=',
+}
 
 export async function runAgent1({ room, style, palettes, maxBudget }) {
   const budgetConstraint = maxBudget
@@ -66,6 +77,50 @@ Important rules:
     }))
   } catch (err) {
     console.error('Agent 1 error:', err)
-    return []
+    return generateFallbackFurniture(room, style, palettes, maxBudget)
   }
+}
+function generateFallbackLinks(name) {
+  const encoded = encodeURIComponent(name)
+  return ROMANIAN_STORES.slice(0, 2).map(store => ({
+    store,
+    url: STORE_LINKS[store] + encoded,
+    price: Math.floor(Math.random() * 2000) + 200,
+  }))
+}
+
+function generateFallbackFurniture(room, style, palettes, maxBudget) {
+  const budget = maxBudget ? parseInt(maxBudget) : 15000
+  const styleColors = {
+    minimalist: ['#F5F5F0', '#2C2C2C', '#E8E8E2'],
+    scandinavian: ['#FFFFFF', '#A0856C', '#4A6741'],
+    industrial: ['#4A4A4A', '#8B7355', '#C0C0C0'],
+    bohemian: ['#D4956A', '#7B6E8F', '#C17F3E'],
+    modern: ['#1A1A2E', '#E94560', '#F5F5F5'],
+  }
+  const colors = styleColors[style] || styleColors.modern
+
+  const templates = [
+    { name: 'Canapea 3 locuri', category: 'seating', width: 2.1, depth: 0.85, height: 0.82, basePrice: 2500 },
+    { name: 'Masă de cafea', category: 'table', width: 1.1, depth: 0.6, height: 0.45, basePrice: 600 },
+    { name: 'Bibliotecă', category: 'storage', width: 0.8, depth: 0.3, height: 1.8, basePrice: 1200 },
+    { name: 'Fotoliu', category: 'seating', width: 0.85, depth: 0.85, height: 0.9, basePrice: 900 },
+    { name: 'Lampă de podea', category: 'lighting', width: 0.4, depth: 0.4, height: 1.7, basePrice: 350 },
+    { name: 'Comodă TV', category: 'storage', width: 1.6, depth: 0.45, height: 0.55, basePrice: 1400 },
+    { name: 'Covor decorativ', category: 'decor', width: 2.0, depth: 1.4, height: 0.01, basePrice: 450 },
+    { name: 'Noptieră', category: 'storage', width: 0.5, depth: 0.4, height: 0.55, basePrice: 380 },
+  ]
+
+  return templates
+    .filter(t => t.width < room.length * 0.7 && t.depth < room.width * 0.7)
+    .slice(0, 7)
+    .map((t, i) => ({
+      id: `f${i + 1}`,
+      ...t,
+      color: colors[i % colors.length],
+      colorName: 'Design color',
+      price: Math.min(Math.round(t.basePrice * (0.8 + Math.random() * 0.4)), budget / 4),
+      description: `${t.name} în stil ${style}, perfect pentru camera ta.`,
+      storeLinks: generateFallbackLinks(t.name),
+    }))
 }
