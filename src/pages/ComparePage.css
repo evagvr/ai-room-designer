@@ -1,0 +1,84 @@
+.compare-page { padding: 40px; max-width: 1100px; }
+.compare-controls {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+.vs-label {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--text-dim);
+  padding-bottom: 4px;
+}
+.select-field {
+  width: 160px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 9px 13px;
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+.select-field:focus { border-color: var(--accent); }
+.compare-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 700px) { .compare-cols { grid-template-columns: 1fr; } }
+.compare-col { padding: 24px; }
+.compare-col-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: var(--accent);
+  margin-bottom: 20px;
+}
+.compare-loading, .compare-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.compare-loading { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.compare-items { display: flex; flex-direction: column; gap: 10px; }
+.compare-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px;
+  background: var(--bg-3);
+  border-radius: var(--radius);
+}
+.ci-color { width: 24px; height: 24px; border-radius: 4px; flex-shrink: 0; margin-top: 2px; }
+.ci-info { flex: 1; min-width: 0; }
+.ci-info strong { display: block; font-size: 12px; font-weight: 500; margin-bottom: 2px; }
+.ci-info span { font-size: 11px; color: var(--text-muted); display: block; }
+.ci-links { margin-top: 4px; }
+.ci-price { font-family: var(--font-display); color: var(--accent); font-size: 12px; white-space: nowrap; }
+.compare-total {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+.compare-total strong { font-family: var(--font-display); font-size: 1rem; color: var(--accent); }
+.fi-link {
+  display: inline-block;
+  font-size: 10px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 2px 8px;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: all var(--transition);
+}
+.fi-link:hover { border-color: var(--accent); color: var(--accent); }
