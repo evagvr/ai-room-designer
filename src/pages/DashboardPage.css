@@ -1,0 +1,52 @@
+.dashboard-page {
+  padding: 40px;
+  max-width: 1000px;
+}
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--text-muted);
+}
+.empty-icon { font-size: 2.5rem; color: var(--text-dim); margin-bottom: 16px; }
+.empty-state p { margin-bottom: 20px; font-size: 14px; }
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+.room-card { padding: 20px; }
+.room-card-header { margin-bottom: 12px; }
+.room-card h4 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--text);
+}
+.rename-input { padding: 6px 10px; font-size: 14px; }
+.room-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+.room-card-meta strong { color: var(--accent); }
+.room-date { font-size: 10px; color: var(--text-dim); }
+.room-card-btns { display: flex; gap: 6px; }
+.rc-btn {
+  padding: 5px 12px;
+  border-radius: var(--radius);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.rc-btn:hover { border-color: var(--accent); color: var(--accent); }
+.rc-btn.danger { color: var(--danger); border-color: rgba(192,84,75,0.2); }
+.rc-btn.danger:hover { background: rgba(192,84,75,0.1); }
