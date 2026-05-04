@@ -1,4 +1,16 @@
 import { create } from 'zustand'
+<<<<<<< feature/spatial-optimizer
+
+const useStore = create((set) => ({
+  // Layout (from Agent 2)
+  layout: [],
+  setLayout: (layout) => set({ layout }),
+  layoutVariants: [],
+  setLayoutVariants: (variants) => set({ layoutVariants: variants }),
+  activeVariant: 0,
+  setActiveVariant: (i) => set({ activeVariant: i }),
+}))
+=======
 import { persist } from 'zustand/middleware'
 
 const useStore = create(
@@ -20,5 +32,6 @@ const useStore = create(
     })
   )
 )
+>>>>>>> main
 
 export default useStore
