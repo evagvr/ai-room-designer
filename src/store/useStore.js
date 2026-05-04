@@ -5,8 +5,9 @@ const useStore = create(
   persist(
     (set, get) => ({
       
-  
-      // Furniture suggestions (from Agent 1)
+      room: { length: '', width: '', height: '' },
+      setRoom: (room) => set({ room }),
+
       furnitureSuggestions: [],
       setFurnitureSuggestions: (items) => set({ furnitureSuggestions: items }),
       selectedFurniture: [],
@@ -16,8 +17,7 @@ const useStore = create(
           : [...s.selectedFurniture, id]
       })),
 
-    }),
-    
+    })
   )
 )
 
