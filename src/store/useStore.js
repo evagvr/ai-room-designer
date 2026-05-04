@@ -4,7 +4,27 @@ import { persist } from 'zustand/middleware'
 const useStore = create(
   persist(
     (set, get) => ({
-    
+      user: null,
+      isAuthenticated: false,
+
+      login: (email) =>
+        set({
+          user: { email, id: Date.now() },
+          isAuthenticated: true,
+        }),
+
+      logout: () =>
+        set({
+          user: null,
+          isAuthenticated: false,
+        }),
+
+      register: (email) =>
+        set({
+          user: { email, id: Date.now() },
+          isAuthenticated: true,
+        }),
+
       room: { length: '', width: '', height: '' },
       setRoom: (room) => set({ room }),
 
@@ -50,7 +70,6 @@ const useStore = create(
       activeVariant: 0,
       setActiveVariant: (i) => set({ activeVariant: i }),
 
-
       furnitureSuggestions: [],
       setFurnitureSuggestions: (items) =>
         set({ furnitureSuggestions: items }),
@@ -64,7 +83,11 @@ const useStore = create(
         })),
     }),
     {
-      name: 'app-store',
+      name: 'interior-designer-storage',
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+      }),
     }
   )
 )
