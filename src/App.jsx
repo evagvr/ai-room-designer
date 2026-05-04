@@ -12,7 +12,7 @@ import ComparePage from './pages/ComparePage'
 import './styles/globals.css'
 
 function ProtectedRoute({ children }) {
-  const isAuthenticated = useStore(s => s.isAuthenticated)
+  const isAuthenticated = useStore((s) => s.isAuthenticated)
   return isAuthenticated ? children : <Navigate to="/login" replace />
 }
 
@@ -24,6 +24,7 @@ export default function App() {
           <Route index element={<HomePage />} />
           <Route path="designer" element={<DesignerPage />} />
           <Route path="compare" element={<ComparePage />} />
+
           <Route
             path="dashboard"
             element={
@@ -32,6 +33,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
         </Route>
