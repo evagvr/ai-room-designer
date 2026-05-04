@@ -23,6 +23,13 @@ const useStore = create(
           : [...s.selectedFurniture, id]
       })),
 
+      layout: [],
+      setLayout: (layout) => set({ layout }),
+      layoutVariants: [],
+      setLayoutVariants: (variants) => set({ layoutVariants: variants }),
+      activeVariant: 0,
+      setActiveVariant: (i) => set({ activeVariant: i }),
+
     }),
     {
       name: 'interior-designer-storage',
