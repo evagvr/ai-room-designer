@@ -1,0 +1,36 @@
+.room-canvas-step {}
+.variants-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+.variant-btn {
+  padding: 6px 14px; border-radius: var(--radius); font-size: 11px; font-weight: 500;
+  border: 1px solid var(--border); background: none; color: var(--text-muted);
+  cursor: pointer; transition: all var(--transition);
+}
+.variant-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(200,169,110,.06); }
+.canvas-layout { display: flex; gap: 20px; align-items: flex-start; }
+.canvas-panel { flex: 1; min-width: 0; }
+.canvas-outer {
+  background: var(--bg-3); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; position: relative;
+  min-height: 160px; display: flex; align-items: center; justify-content: center;
+}
+.canvas-empty {
+  text-align: center; padding: 60px 20px;
+  color: var(--text-muted); font-size: 13px; position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.canvas-hint { font-size: 11px; color: var(--text-dim); margin-top: 8px; }
+.canvas-legend { width: 180px; flex-shrink: 0; }
+.legend-title {
+  font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: 10px;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; color: var(--text-muted); margin-bottom: 6px;
+}
+.legend-dot { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+.legend-pos { margin-left: auto; font-family: monospace; font-size: 10px; color: var(--text-dim); }
+@media (max-width: 700px) {
+  .canvas-layout { flex-direction: column; }
+  .canvas-legend { width: 100%; }
+}
