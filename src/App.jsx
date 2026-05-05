@@ -18,7 +18,7 @@ function ProtectedRoute({ children }) {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/ai-room-designer">
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
