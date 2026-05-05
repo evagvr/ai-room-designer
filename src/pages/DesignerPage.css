@@ -1,0 +1,134 @@
+.designer-page {
+  display: flex;
+  min-height: calc(100vh - 56px);
+}
+
+.designer-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--bg-2);
+  border-right: 1px solid var(--border-light);
+  padding: 32px 20px;
+  position: sticky;
+  top: 56px;
+  height: calc(100vh - 56px);
+  overflow-y: auto;
+}
+
+.designer-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  margin-bottom: 28px;
+  font-weight: 300;
+}
+
+.step-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: none;
+  border: 1px solid transparent;
+  text-align: left;
+  cursor: default;
+  transition: all var(--transition);
+  width: 100%;
+}
+
+.step-item.done { cursor: pointer; }
+.step-item.done:hover { background: var(--surface); }
+.step-item.active { background: var(--surface); border-color: var(--border); }
+
+.step-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.step-item.active .step-dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+
+.step-item.done .step-dot {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+  color: var(--bg);
+  font-size: 11px;
+}
+
+.step-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.step-info strong {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.step-item.active .step-info strong { color: var(--text); }
+
+.step-info em {
+  font-style: normal;
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+
+.designer-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.step-content {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+  max-width: 900px;
+}
+
+.step-footer {
+  padding: 20px 40px;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background: var(--bg);
+}
+
+@media (max-width: 768px) {
+  .designer-page { flex-direction: column; }
+  .designer-sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    padding: 16px;
+  }
+  .step-nav { flex-direction: row; overflow-x: auto; }
+  .step-item { flex-direction: column; gap: 4px; min-width: 60px; align-items: center; }
+  .step-info strong { font-size: 10px; }
+  .step-content { padding: 24px 16px; }
+  .step-footer { padding: 16px; }
+}
