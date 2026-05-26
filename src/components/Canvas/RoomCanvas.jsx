@@ -53,11 +53,9 @@ export default function RoomCanvas() {
     ctx.fillStyle = '#1a1a17'; ctx.fillRect(0, 0, W, H)
     ctx.strokeStyle = 'rgba(200,169,110,0.6)'; ctx.lineWidth = 2
     ctx.strokeRect(1, 1, W - 2, H - 2)
-    // Grid
     ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 0.5
     for (let x = 0; x <= rl; x += 0.5) { ctx.beginPath(); ctx.moveTo(x * scale, 0); ctx.lineTo(x * scale, H); ctx.stroke() }
     for (let y = 0; y <= rw; y += 0.5) { ctx.beginPath(); ctx.moveTo(0, y * scale); ctx.lineTo(W, y * scale); ctx.stroke() }
-    // Meter labels
     ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.font = '9px monospace'
     for (let x = 1; x <= rl; x++) { if (x * scale < W - 10) ctx.fillText(x + 'm', x * scale - 12, H - 4) }
     for (let y = 1; y <= rw; y++) { if (y * scale < H - 10) ctx.fillText(y + 'm', 4, y * scale - 4) }
@@ -161,6 +159,31 @@ export default function RoomCanvas() {
     setLoading(false)
   }
 
+  const handleAsezareNoua = async () => {
+    setLoading(true); setHasError(false)
+    setStatus('Generare variantă alternativă...')
+    try {
+      let currentVariants = [...layoutVariants]
+      if (currentVariants.length === 0 && currentLayout.length > 0) {
+        currentVariants = [currentLayout]
+      }
+      
+      const nextVariantNum = currentVariants.length
+      const newLayout = await runAgent2({ room, selectedItems, variant: nextVariantNum })
+      
+      const updated = [...currentVariants, newLayout]
+      setLayoutVariants(updated)
+      setActiveVariant(updated.length - 1)
+      setLayout(newLayout)
+      setCurrentLayout(newLayout)
+      setStatus(`Variantă nouă calculată (Strategia ${nextVariantNum % 8 + 1}/8) ✓`)
+    } catch {
+      setHasError(true)
+      setStatus('Eroare la calcularea așezării noi')
+    }
+    setLoading(false)
+  }
+
   const switchVariant = (i) => {
     setActiveVariant(i)
     setLayout(layoutVariants[i])
@@ -172,7 +195,7 @@ export default function RoomCanvas() {
   return (
     <div className="room-canvas-step">
       <h2 className="section-title">Layout cameră</h2>
-      <p className="section-sub">Agentul AI Optimizer calculează pozițiile optime ale mobilierului.</p>
+      <p className="section-sub">Optimizer-ul plasează piesele automat în cameră, fără suprapuneri.</p>
 
       <div className={`agent-banner ${hasError ? 'error' : loading ? 'running' : currentLayout.length > 0 ? 'done' : ''}`}>
         <div className={`agent-dot ${loading ? 'loading' : hasError ? 'error' : ''}`} />
@@ -180,9 +203,20 @@ export default function RoomCanvas() {
           <strong>Agent 2 — Spatial Optimizer</strong>
           <span>{status}</span>
         </div>
-        <button className="run-btn" onClick={() => handleGenerate(false)} disabled={loading}>
-          {loading ? <><span className="spinner" /> Calculează...</> : '◎ Generează layout'}
-        </button>
+        {currentLayout.length > 0 ? (
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button className="run-btn reset-luxury" onClick={() => handleGenerate(false)} disabled={loading}>
+              Resetare
+            </button>
+            <button className="run-btn new-placement-luxury" onClick={handleAsezareNoua} disabled={loading}>
+              {loading ? <><span className="spinner" /> Calcul...</> : '🔀 Așezare nouă'}
+            </button>
+          </div>
+        ) : (
+          <button className="run-btn primary-gold" onClick={() => handleGenerate(false)} disabled={loading}>
+            {loading ? <><span className="spinner" /> Calculează...</> : '◎ Generează layout'}
+          </button>
+        )}
       </div>
 
       {layoutVariants.length > 0 && (
