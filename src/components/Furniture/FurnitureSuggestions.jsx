@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import useStore from '../../store/useStore'
 import { runAgent1 } from '../../agents/agent1Designer'
+import { getFurnitureImage, getFurnitureImageFallback } from '../../utils/furnitureImages'
+import { normalizeProductDims } from '../../utils/dimensions'
 import './FurnitureSuggestions.css'
 
 export default function FurnitureSuggestions() {
@@ -11,7 +13,7 @@ export default function FurnitureSuggestions() {
   } = useStore()
 
   const [loading, setLoading] = useState(false)
-  const [status, setStatus] = useState('Gata să genereze sugestii de mobilier')
+  const [status, setStatus] = useState('Gata să caute mobilier în catalog')
   const [hasError, setHasError] = useState(false)
 
   const selTotal = selectedFurniture.reduce((acc, id) => {
@@ -24,13 +26,13 @@ export default function FurnitureSuggestions() {
   const handleGenerate = async () => {
     setLoading(true)
     setHasError(false)
-    setStatus('Agent 1 generează mobilier personalizat...')
+    setStatus('Agent 1 caută mobilier în catalog...')
     try {
       const items = await runAgent1({
         room, style: selectedStyle, palettes: selectedPalettes, maxBudget,
       })
-      setFurnitureSuggestions(items)
-      setStatus(`${items.length} articole generate cu succes ✓`)
+      setFurnitureSuggestions(items.map(normalizeProductDims))
+      setStatus(`${items.length} produse găsite în catalog ✓`)
     } catch {
       setHasError(true)
       setStatus('Eroare la generare — se folosesc sugestii predefinite')
@@ -41,7 +43,7 @@ export default function FurnitureSuggestions() {
   return (
     <div className="furniture-suggestions">
       <h2 className="section-title">Mobilier sugerat</h2>
-      <p className="section-sub">Agentul AI Designer generează mobilier personalizat pentru camera ta.</p>
+      <p className="section-sub">Agentul filtrează produse reale din catalog după stilul camerei, buget și dimensiuni.</p>
 
       <div className={`agent-banner ${hasError ? 'error' : loading ? 'running' : furnitureSuggestions.length > 0 ? 'done' : ''}`}>
         <div className={`agent-dot ${loading ? 'loading' : hasError ? 'error' : ''}`} />
@@ -50,7 +52,7 @@ export default function FurnitureSuggestions() {
           <span>{status}</span>
         </div>
         <button className="run-btn" onClick={handleGenerate} disabled={loading}>
-          {loading ? <><span className="spinner" /> Generează...</> : '✦ Generează mobilier'}
+          {loading ? <><span className="spinner" /> Caută...</> : '✦ Caută în catalog'}
         </button>
       </div>
 
@@ -96,44 +98,59 @@ export default function FurnitureSuggestions() {
       ) : (
         <div className="empty-furniture">
           <div className="ef-icon">◈</div>
-          <p>Apasă <strong>"Generează mobilier"</strong> pentru a vedea sugestii personalizate
+          <p>Apasă <strong>"Caută în catalog"</strong> pentru a vedea produse reale
             bazate pe stilul <strong>{selectedStyle}</strong> și paleta ta de culori.</p>
         </div>
       )}
     </div>
   )
 }
+function FurnitureCard({ item, selected, onToggle }) {
+  const imageUrl = getFurnitureImage(item)
+  const fallbackUrl = getFurnitureImageFallback(item)
 
-// function FurnitureCard({ item, selected, onToggle }) {
-//   return (
-//     <div className={`furniture-card ${selected ? 'selected' : ''}`} onClick={onToggle}>
-//       <input
-//         type="checkbox"
-//         checked={selected}
-//         onChange={onToggle}
-//         onClick={e => e.stopPropagation()}
-//       />
-//       <div className="fc-color" style={{ background: item.color || '#888' }} />
-//       <div className="fc-info">
-//         <strong>{item.name}</strong>
-//         <p className="fc-desc">{item.description}</p>
-//         <span className="fc-dims">{item.width}m × {item.depth}m × {item.height}m înălțime</span>
-//         <div className="fc-links">
-//           {(item.storeLinks || []).map(l => (
-            
-//               key={l.store}
-//               className="store-link"
-//               href={l.url}
-//               target="_blank"
-//               rel="noreferrer"
-//               onClick={e => e.stopPropagation()}
-//             >
-//               {l.store} — {(l.price || item.price).toLocaleString()} RON
-//             </a>
-//           ))}
-//         </div>
-//       </div>
-//       <div className="fc-price">{(item.price || 0).toLocaleString()} RON</div>
-//     </div>
-//   )
-// }
+  return (
+    <div className={`furniture-card ${selected ? 'selected' : ''}`} onClick={onToggle}>
+      <input
+        type="checkbox"
+        checked={selected}
+        onChange={onToggle}
+        onClick={e => e.stopPropagation()}
+      />
+      <div className="fc-image-wrapper">
+        <img
+          src={imageUrl}
+          alt={item.name}
+          className="fc-image"
+          onError={(e) => {
+            if (e.currentTarget.src !== fallbackUrl) {
+              e.currentTarget.src = fallbackUrl
+            }
+          }}
+        />
+        <span className="fc-color-badge" style={{ background: item.color || '#888' }} title={item.colorName || 'Culoare'} />
+      </div>
+      <div className="fc-info">
+        <strong>{item.name}</strong>
+        <p className="fc-desc">{item.description}</p>
+        <span className="fc-dims">{item.width}m × {item.depth}m × {item.height}m înălțime</span>
+        <div className="fc-links">
+          {(item.storeLinks || []).map(l => (
+            // ✅ S-a adăugat tag-ul 'a' corect aici
+            <a 
+              key={l.store}
+              className="store-link"
+              href={l.url}
+              target="_blank"
+              rel="noreferrer"
+              onClick={e => e.stopPropagation()}
+            >
+              {l.store} — {(l.price || item.price).toLocaleString()} RON
+            </a>
+          ))}
+        </div>
+      </div>
+      <div className="fc-price">{(item.price || 0).toLocaleString()} RON</div>
+    </div>
+  )
+}
