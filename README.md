@@ -1,12 +1,13 @@
-# Atelier AI — AI Interior Designer
+# ⚜️ Atelier AI — AI Interior Designer
 
-> An intelligent room design experience powered by two specialised AI agents.
+> An intelligent, premium room design experience powered by two local collaborative AI agents.
 
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)
 ![Zustand](https://img.shields.io/badge/Zustand-4-brown)
 ![Vitest](https://img.shields.io/badge/Vitest-1.3-6E9F18?logo=vitest&logoColor=white)
-![Claude API](https://img.shields.io/badge/Claude-Sonnet_4-orange)
+![Ollama API](https://img.shields.io/badge/Ollama-Mistral-blue)
+![Django REST](https://img.shields.io/badge/Django-REST_Framework-092E20?logo=django&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?logo=github-actions&logoColor=white)
 
 ---
@@ -32,71 +33,40 @@
 
 ## Project Overview
 
-**Atelier AI** is a browser-based interior design application that uses two specialised AI agents to help users plan and visualise their living spaces. The user configures room dimensions, selects a design style and colour palette, sets a budget, and the system does the rest — generating personalised furniture suggestions with real Romanian store links, then computing an optimal spatial layout on a 2D interactive canvas.
+**Atelier AI** is a premium, responsive browser-based interior design application that uses two specialized **local AI agents** to help users plan, optimize, and visualize their living spaces. Users configure physical room dimensions, select design styles, specify budgets, and interact in real time with a conversational agent to generate and refine a personalized list of real furniture (sourced with direct Romanian store links). The system then computes an optimal, collision-free spatial layout and renders it on a responsive 2D interactive canvas, complete with premium white-and-gold visual PDF blueprints.
 
-The system is built around two AI agents: a **Designer Agent** that generates contextually appropriate furniture matched to the user's aesthetic and budget, with purchase links from IKEA, Dedeman, Vivre, and Mobexpert; and a **Spatial Optimizer Agent** that calculates collision-free furniture placement with a minimum 90 cm circulation aisle, returning precise x/y coordinates and rotation values for each piece.
+To make the application cost-free, secure, and private, it completely replaces expensive external APIs with **Ollama** (running a local `mistral` model on the user's machine) communicating with a robust **Django REST Framework** backend. 
 
-What distinguishes this project from a conventional room planner is the depth of AI integration — every furniture suggestion, every layout computation, and every style comparison passes through a language model. The application adapts to the user's choices in real time, and no two sessions produce the same output.
-
-AI tooling was also used throughout the development process itself — from generating user stories and architecture diagrams to writing test suites and optimising agent prompts. The full account is documented in the [AI Usage in Development](#ai-usage-in-development) section and in [`docs/ai-usage-report.md`](./docs/ai-usage-report.md).
+AI tooling was extensively integrated across the entire software development lifecycle (SDLC) — from requirements elicitation and backlog creation to unit testing, prompt engineering, and visual asset rendering.
 
 ---
 
 ## Features
 
-### Room Configuration
-- Numeric input fields for length, width, and height in metres
-- Real-time visual preview of the room proportions (scaled 2D rectangle)
-- Live calculation of floor area (m²) and volume (m³)
-- Validation: all fields required; values must be between 1 m and 30 m
+### Streamlined 4-Step Designer Wizard
+The interface is consolidated into a highly intuitive, step-by-step design pipeline:
+1.  **Camera (Dimensions)**: Configures room length, width, and height in meters. Live floor area ($m^2$) and volume ($m^3$) are calculated instantly on the sidebar alongside a proportional wall boundary preview.
+2.  **Mobilier (Chat AI)**: A chat interface where users converse with the **Designer Agent** (Agent 1). The agent automatically queries the SQLite database to suggest real-market furniture matching the style and budget, rendering interactive product selection cards.
+3.  **Layout (Room Canvas)**: Computes and displays the spatial arrangement of the chosen items. Includes an interactive 2D canvas with full drag-and-drop, collision highlighting, and a premium control dock (`🔀 Așezare nouă`).
+4.  **Export (PDF & Save)**: Shows a read-only blueprint next to a purchase list and provides an automated PDF report download along with a CRUD project saving dashboard.
 
-### Style & Palette Selection
-- Five design styles: Minimalist, Scandinavian, Industrial, Bohemian, Modern
-- Four colour palettes: Neutral, Warm, Cool, Colourful — multiple palettes selectable simultaneously
-- Selections feed directly into the Designer Agent prompt as hard constraints
+### Real-Time Collision-Free Layout Algorithm
+- Uses bounding boxes based on the actual physical dimensions of each furniture item.
+- Items are bounded completely within the room walls.
+- Features **global auto-repositioning** on product additions: large structural items (like beds or sofas) are sorted and placed first to optimize room utilization, followed by smaller items.
+- Features real-time visual overlap checks, highlighting colliding items in warning red.
 
-### AI-Powered Furniture Suggestions — Agent 1
-- Generates 6–8 furniture items tailored to room dimensions, style, palette, and budget
-- Each item includes name, exact dimensions, colour, price in RON, and a description
-- At least two purchase links per item from Romanian stores: IKEA, Dedeman, Vivre, Mobexpert
-- Links open in a new browser tab
-- Fallback to a curated local product database if the API is unavailable
-- Running total of selected items always visible; over-budget warning shown in real time
+### Premium Control Dock (`🔀 Așezare nouă`)
+- A glassmorphic design action panel employing semi-transparent gold borders, Bezier morph transitions, and physical lift glow-shadows.
+- Allows users to cycle through **8 distinct layout strategies** calculated by the Spatial Optimizer backend (Corner-biased, Wall-bound/Perimeter, Wide-spaced, Cozy center grouping, etc.) to guarantee 100% unique, diverse, and collision-free spatial variations.
 
-### AI-Powered Layout Generation — Agent 2
-- Calculates optimal x/y coordinates and rotation (0° or 90°) for each selected piece
-- All items guaranteed to remain within the room boundaries
-- Targets a minimum 90 cm circulation aisle between items
-- At least two meaningfully different layout variants can be generated and switched between
+### Professional Visual PDF Blueprint
+- Generates a premium architectural report (white, charcoal, and warm gold blueprint accents) directly from the browser using `jsPDF`.
+- Converts the active HTML5 canvas schiță into a high-fidelity PNG data URI and embeds the image directly into the document.
 
-### Interactive 2D Canvas
-- Canvas rendered proportionally to real room dimensions with a metric grid
-- Each furniture piece displayed as a labelled, colour-coded rectangle
-- Full drag-and-drop repositioning via mouse and touch
-- Items cannot be dragged outside the room boundaries
-- Overlapping items highlighted in red with real-time collision detection
-
-### Budget Filtering
-- Optional maximum budget input in RON
-- Designer Agent uses the budget as a hard constraint during generation
-- Running price total updates on every checkbox toggle
-- Visual progress bar and warning when the selection exceeds the budget
-
-### Style Comparison
-- Side-by-side view of two user-selected design styles
-- Each panel shows independent AI-generated furniture suggestions for that style
-- Total estimated cost displayed per panel
-
-### Save & Export
-- Authenticated users can save any project configuration to their account
-- Saved rooms appear in a personal dashboard and can be renamed or deleted
-- Any saved room can be loaded and resumed from the layout step
-- Export to a downloadable plan file containing the 2D layout coordinates, full furniture list with prices, and all store links
-
-### Authentication
-- Email and password registration (minimum 8-character password, unique email enforced)
-- Protected routes redirect unauthenticated users to the login page
-- Session persisted across browser refreshes via localStorage
+### Saved Projects CRUD Dashboard
+- Authenticated users can save project configurations to their account.
+- Saved layouts are listed in a dashboard where they can be loaded, renamed, or deleted.
 
 ---
 
@@ -105,128 +75,145 @@ AI tooling was also used throughout the development process itself — from gene
 ### Project Structure
 
 ```
-ai-interior-designer/
-├── src/
-│   ├── agents/
-│   │   ├── agent1Designer.js       # Agent 1: furniture generation via LLM
-│   │   └── agent2Optimizer.js      # Agent 2: spatial layout + collision detection
-│   ├── components/
+ai-room-designer/
+├── .github/                # GitHub workflows (CI/CD pipeline)
+│   └── workflows/
+│       └── ci.yml          # Runs tests, coverage, lint, build & Pages deploy
+├── backend/                # Django REST API Backend
+│   ├── agents/             # Agent 1 & Agent 2 Ollama connectors
+│   │   ├── agent1_designer.py   # AI Designer + dimension fallback
+│   │   ├── agent2_optimizer.py  # Spatial Optimizer + 8 layout strategies
+│   │   └── ollama_service.py    # Local Ollama client
+│   ├── furniture/          # Furniture DB models, search services & commands
+│   │   ├── management/
+│   │   │   └── commands/        # Custom load_custom_products commands
+│   │   ├── custom_products.json # 80KB furniture catalogue
+│   │   └── search_service.py    # Fallback search query analyzer
+│   ├── interior_designer/  # Core Django configuration & router
+│   ├── rooms/              # CRUD endpoints for saved layouts
+│   ├── users/              # Auth REST endpoints
+│   ├── manage.py           # Django CLI
+│   └── db.sqlite3          # SQLite Database
+├── diagrams/               # Architecture and sequence flow assets (PNG)
+├── docs/                   # Academic reports
+│   └── raport_utilizare_ai.md  # Detailed AI usage report (70% AI / 30% Human)
+├── public/                 # Static assets
+├── src/                    # Frontend React Application
+│   ├── agents/             # API client connectors for Agent 1 and Agent 2
+│   ├── components/         # Reusable UI widgets
 │   │   ├── Canvas/
-│   │   │   └── RoomCanvas.jsx      # 2D canvas with drag & drop (US-09, US-10)
+│   │   │   └── RoomCanvas.jsx   # 2D Canvas with premium action buttons
 │   │   ├── Export/
-│   │   │   └── ExportPanel.jsx     # Export + save project (US-13, US-14)
-│   │   ├── Furniture/
-│   │   │   ├── FurnitureSuggestions.jsx  # Agent 1 UI + selection (US-04–US-06)
-│   │   │   └── BudgetFilter.jsx          # Budget input (US-11)
-│   │   ├── Room/
-│   │   │   ├── RoomConfig.jsx      # Dimensions input (US-01)
-│   │   │   ├── StyleSelection.jsx  # Style picker (US-02)
-│   │   │   └── PaletteSelection.jsx # Palette picker (US-03)
-│   │   └── Layout.jsx              # Navbar and page wrapper
-│   ├── data/
-│   │   └── productDatabase.js      # Local catalogue: real URLs, prices, styles
-│   ├── pages/
-│   │   ├── DesignerPage.jsx        # 7-step wizard
-│   │   ├── HomePage.jsx
-│   │   ├── ComparePage.jsx         # Side-by-side style comparison (US-12)
-│   │   ├── DashboardPage.jsx       # Saved rooms (US-13)
-│   │   └── AuthPages.jsx           # Login + Register (US-15)
+│   │   │   └── ExportPanel.jsx  # PDF visual exporter + diacritics sanitizer
+│   │   └── Layout.jsx
+│   ├── pages/              # Wizard page controllers
+│   │   ├── DesignerPage.jsx     # Clamped 4-step wizard
+│   │   └── AuthPages.jsx
 │   ├── store/
-│   │   └── useStore.js             # Zustand global state (persisted)
-│   ├── styles/globals.css
-│   ├── App.jsx
-│   └── main.jsx
-├── tests/
-│   ├── agent1.test.js              # 6 unit tests — Agent 1
-│   ├── agent2.test.js              # 9 unit tests — Agent 2 + collision detection
-│   ├── store.test.js               # 11 tests — store logic, auth, agent evals
-│   └── setup.js
-
-├── .github/workflows/ci.yml
+│   │   └── useStore.js          # Zustand global state with local persistence
+│   └── App.jsx
+├── tests/                  # Automated Vitest Suite (Unit + Evals)
+│   ├── agent1.test.js      # Validator for Agent 1 constraints
+│   ├── agent2.test.js      # Validator for Agent 2 collision rules
+│   └── store.test.js       # Store state, area/volume, & 3 Agent evals
 ├── index.html
 ├── vite.config.js
 └── package.json
+```
 
+---
 
 ## AI Agents
 
-Both agents are stateless — all context is injected per request — making them independently testable and replaceable. Both implement a validated local fallback if the API is unavailable or returns malformed JSON.
+Both agents are stateless, completely isolated from direct UI components, and communicate via REST APIs, making them fully testable. Both implement robust local fallbacks inside the client if the backend or local Ollama service is offline.
 
-### Agent 1 — Designer Agent (`src/agents/agent1Designer.js`)
+### Agent 1 — AI Designer (`backend/agents/agent1_designer.py`)
 
-Receives the room dimensions, selected design style, colour palettes, and maximum budget. Builds a structured prompt and calls `claude-sonnet-4-20250514`. Returns an array of 6–8 furniture items, each with:
+The Designer Agent acts as a virtual interior design consultant that interacts with the user in natural language through the chat interface:
+- **Semantic Intent Extraction**: Parses the user's chat messages (queries like *"canapea roșie"*, *"măsuță modernă"*) using a semantic analyzer (`intent_extractor.py`) to determine what category of furniture the user is looking for, alongside their aesthetic or style specifications.
+- **Controlled Prompt Engineering**: Builds a strict prompt injected with system-level constraints, instructing the local Ollama LLM to formulate valid structured JSON matching our required catalog schema.
+- **Intelligent Database Queries**: Dynamically queries our local SQLite database (`FurnitureProduct` model) populated with over 80KB of real furniture catalog data (such as IKEA, Dedeman, Mobexpert, and Vivre). It uses style relevance algorithms (`relevance.py`) to rank items by how well they match the chosen design styles (Minimalist, Modern, Industrial, etc.) and selected color palettes.
+- **Budget & Boundary Checks**: Enforces the maximum budget bounds specified by the user, dynamically filtering out items that exceed the financial threshold. It also ensures that no recommended furniture item is physically too large to fit inside the room dimensions (hard-clamped to a maximum of 75% of the shortest room dimension).
+- **Purchase and Info Links**: Returns 6-8 high-fidelity recommendations, complete with realistic descriptions, physical dimensions (width, depth, height in meters), hex colors, prices in RON, and direct links to the active products.
 
-- Name, category, and physical dimensions (width × depth × height in metres)
-- Hex colour and colour name matching the selected palette
-- Price in RON within the stated budget
-- A short description consistent with the chosen style
-- Two store links per item from IKEA, Dedeman, Vivre, or Mobexpert with individual prices
-
-**Prompt constraints enforced:**
-- No item may exceed 75% of the minimum room dimension
-- Colours must belong to the selected palette
-- Style must match the selection
-- Prices must be realistic for the Romanian market
-
-**Fallback:** if the API call fails or the response cannot be parsed, the agent falls back to `src/data/productDatabase.js` — a curated catalogue of real products with verified URLs and prices — filtered by style, palette, budget, and room dimensions.
-
-### Agent 2 — Spatial Optimizer Agent (`src/agents/agent2Optimizer.js`)
-
-Receives the room dimensions and the user-selected furniture list. Returns x/y coordinates and a rotation value (0° or 90°) for every item:
-
-- All items fully within room boundaries
-- No two items overlapping
-- Minimum 90 cm circulation aisle between items
-- Seating oriented toward a focal point
-- Beds placed against a wall
-
-**Variant generation:** a second call with an incremented variant index produces a meaningfully different arrangement. Multiple variants are saved in state and switchable without regeneration.
-
-**Post-processing:** `validateAndFixLayout()` clamps all coordinates to room boundaries regardless of model output. `checkCollisions()` runs client-side after every drag-and-drop operation.
-
-**Fallback:** if the API fails, a randomised placement algorithm runs client-side, sampling positions until overlaps are minimised.
+### Agent 2 — AI Spatial Optimizer (`backend/agents/agent2_optimizer.py`)
+- Receives the room coordinates and the bounding boxes of the selected items.
+- Computes layout positioning ($x, y$ coordinates and rotation angles) using **8 distinct spatial strategies** mapped to `variant % 8`:
+  - *Variant 0-3*: Cadran Corner Biases (Top-Left, Bottom-Right, Top-Right, Bottom-Left).
+  - *Variant 4*: Wide Distribution (Maximizes spacing between items).
+  - *Variant 5*: Wall-bound (Aligns beds and cabinets against walls).
+  - *Variant 6*: Alternating Corners (Balances visual weight across the room).
+  - *Variant 7*: Cozy Centered (Groups seating and social elements around a center focus).
 
 ---
 
 ## Getting Started
 
 ### Prerequisites
+- **Node.js 18+** & **npm**
+- **Python 3.10+** (with virtualenv)
+- **Ollama** installed (Windows application or macOS/Linux curl install)
 
-- Node.js 18 or higher
-- npm 9 or higher
+---
 
-No backend server, no database, and no environment variables are required. The application runs entirely in the browser.
+### Step-by-Step Installation
 
-### Installation
-
+#### 1. Setup Motor AI Local (Ollama)
+Download Ollama from [ollama.ai](https://ollama.ai) and run:
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/ai-interior-designer.git
-cd ai-interior-designer
-
-# Install dependencies
-npm install
+# Pull the lightweight model configured for the agents
+ollama pull mistral
 ```
 
-### Running the Application
-
+#### 2. Setup Backend (Django REST API)
+Open a terminal inside the `/backend` folder:
 ```bash
-# Development server
+cd backend
+
+# Create and activate Python virtual environment
+# On Windows:
+python -m venv venv
+venv\Scripts\activate
+# On macOS/Linux:
+python3 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Setup environment variables
+# On Windows:
+copy .env.example .env
+# On macOS/Linux:
+cp .env.example .env
+
+# Run database migrations
+python manage.py migrate
+
+# POPULATE DATABASE (CRITICAL: Loads the 80KB furniture catalogue!)
+python manage.py load_custom_products --clear
+
+# Start the Django development server
+python manage.py runserver
+# → http://localhost:8000
+```
+
+#### 3. Setup Frontend (React + Vite)
+Open a terminal in the **root** folder:
+```bash
+# Install Node dependencies
+npm install
+
+# Start the React development server
 npm run dev
 # → http://localhost:5173
-
-# Production build
-npm run build
-
-# Preview production build
-npm run preview
 ```
 
 ---
 
 ## Testing & Evaluations
 
-The project ships **26 passing tests** across three test files. Testing is split into unit tests for each agent, store logic tests, and AI agent evaluations.
+The project ships **29 passing tests** across three test files. Testing is split into unit tests for each agent, store logic tests, and AI agent evaluations.
 
 ```bash
 # Run all tests
@@ -243,56 +230,57 @@ npm run test:watch
 
 | File | Tests | Coverage Area |
 |------|-------|---------------|
-| `tests/agent1.test.js` | 6 | API mock, fallback generation, required fields, store links, boundary compliance, budget constraint |
-| `tests/agent2.test.js` | 9 | Layout generation, boundary clamping, rotation validation, `checkCollisions()` — 5 cases |
+| `tests/agent1.test.js` | 7 | API mock, fallback generation, required fields, store links, boundary compliance, budget constraint |
+| `tests/agent2.test.js` | 11 | Layout generation, boundary clamping, rotation validation, `checkCollisions()` — 5 cases |
 | `tests/store.test.js` | 11 | Room dimension validation, area/volume calculation, furniture toggle, auth validation, 3 agent evals |
 
-### AI Agent Evaluations
+### AI Agent Evaluations (`tests/store.test.js`)
+We use programmatic assertions during CI/CD to validate that the output produced by the AI agents satisfies strict physical rules:
 
-Agent behaviour is validated in `tests/store.test.js` against five criteria on every CI run:
-
-| Evaluation | Criterion | How It Is Tested |
-|------------|-----------|------------------|
-| Prompt completeness | Agent 1 prompt must contain dimensions, style, palette, and budget | String-content assertions on the constructed prompt |
-| Dimension compliance | No furniture item may exceed room boundaries | `width < roomLength && depth < roomWidth` checked per item |
-| Spatial constraints | Agent 2 prompt must include the 90 cm circulation requirement | String-content assertions on the constructed prompt |
-| Boundary safety | All layout coordinates must remain within the room after clamping | Coordinate assertions against known edge-case inputs |
-| Fallback field validity | Fallback furniture must pass the same schema checks as API output | Field presence and type checks on every fallback item |
+| Evaluation | Objective | Assertion Mechanics |
+|------------|-----------|--------------------|
+| **Dimension Check** | No furniture item may exceed the room dimensions. | Loops through items and checks `width < roomLength` & `depth < roomWidth`. |
+| **Budget Constraint** | Fallback items must respect the max budget constraint. | Verifies that total cost of recommended items does not exceed the alocated limit. |
+| **Boundary Safety** | Clamps all positions within walls. | Verifies that the bounding boxes of Agent 2 coordinates do not extend beyond the coordinates of the room walls. |
+| **Fallback Scheme Validity** | Verifies database items scheme integrity. | Asserts presence and datatype of `id`, `name`, `storeLinks`, and `price`. |
 
 ---
 
 ## CI/CD Pipeline
 
-Automated via GitHub Actions on every push and pull request to `main`.
+Automated through **GitHub Actions** defined in [`.github/workflows/ci.yml`](./.github/workflows/ci.yml).
 
 ```
-push / pull request to main
-          ↓
+push / pull request to main or develop
+          │
+          ▼
 Checkout repository
-          ↓
-Set up Node.js 20
-          ↓
-Install dependencies  (npm ci)
-          ↓
-Run Vitest unit + eval tests
-          ↓
-Generate coverage report
-          ↓
-Syntax check
-          ↓
-Build with Vite
-          ↓
-Upload build artifact
-          ↓
-Deploy to GitHub Pages  (main branch only)
+          │
+          ▼
+Setup Node.js v20 (with npm cache)
+          │
+          ▼
+Install Node modules  (npm ci)
+          │
+          ▼
+Run Vitest Unit & Agent Eval tests  (npm run test)
+          │
+          ▼
+Generate and upload Coverage Report
+          │
+          ▼
+Syntax & Lint checks
+          │
+          ▼
+Build React bundle  (npm run build)
+          │
+          ▼
+Deploy to GitHub Pages  (push to main only)
 ```
-
-Pipeline configuration: [`.github/workflows/ci.yml`](./.github/workflows/ci.yml)
-
-No code reaches `main` without a passing build and all tests green.
 
 ---
 
+## Backlog
 
 ### Epic Overview
 
@@ -330,7 +318,19 @@ No code reaches `main` without a passing build and all tests green.
 - Layout coordinates included per item
 - File downloadable directly from the browser
 
+---
 
+## Definition of Done
+
+A feature is considered **Done** only when:
+1.  **Code Quality**: The code conforms to modern ESLint rules; no hardcoded credentials or API keys are present.
+2.  **Responsiveness**: The visual component scales perfectly across desktop, tablet, and mobile layouts.
+3.  **Local AI Compatibility**: Verified that the Ollama prompt yields correctly formatted structured JSON with Mistral.
+4.  **Green Tests**: All Vitest test suites (29/29) run and pass successfully.
+5.  **CI/CD Pipeline**: GitHub Actions runs the entire build and testing pipeline to completion with no warnings.
+6.  **Documentation**: `walkthrough.md`, `task.md` and this `README.md` are updated to reflect the new state.
+
+---
 
 ## Diagrams
 
@@ -344,6 +344,38 @@ No code reaches `main` without a passing build and all tests green.
 | State Schema | Complete Zustand store structure with field types and persistence boundaries |
 
 ---
+
+## Bug Reports & Pull Requests
+
+All bugs are tracked as GitHub Issues and resolved via dedicated bug-fix branches and Pull Requests. Each PR references the respective issue it resolves and must successfully pass the entire automated CI pipeline (Vitest unit tests, agent evaluations, and production build checks) before it is allowed to merge.
+
+A concrete example of our bug-tracking and resolution process is documented below. The full, historical record of all issues is available directly within our repository's Issues and Pull Requests tabs.
+
+### Bug ID #003: Variant Repetition in Spatial Optimizer (Agent 2 Layouts)
+- **Description**: Clicking the `🔀 Așezare nouă` button updated the frontend variant index successfully, but Agent 2 returned identical coordinate placements for variant 2 onwards, failing to produce alternative arrangements.
+- **Diagnosis**: The optimizer in backend `agent2_optimizer.py` ran a loop checking 16 variations and always picked the configuration with the highest spread score (`_layout_spread_score`). Since the spread score calculation is purely deterministic and strongly biases corners, all search iterations resolved to the exact same visual layout.
+- **Resolution**: Removed the redundant spread score maximization loop and mapped the frontend `variant` parameter directly to the pre-programmed quadrant/distribution strategies (`variant % 8`), guaranteeing 8 completely unique and disjoint layout configurations at every button click.
+- **Pull Request**: Submitted `feature/agent2-strategies` targeting `develop` and successfully merged.
+
+---
+
+## AI Usage in Development
+
+Development followed a structured division: **70% AI Execution (repetitive boilerplate, styling utilities, CSS, unit test assertions, catalog database structuring) and 30% Human Direction & Architecture (business logic rules, styling themes, spatial layout variant designs, diacritics fallback strategy, and debugging).**
+
+> [!TIP]
+> **Complete AI Report**: A comprehensive, detailed report outlining our prompt engineering methodologies, workflow splits, advantages, and lessons learned is available at:  
+> 🔗 **[`docs/raport_utilizare_ai.md`](./docs/raport_utilizare_ai.md)**
+
+---
+
+## Demo
+
+- **Live Application**: [https://evagvr.github.io/ai-room-designer/](https://evagvr.github.io/ai-room-designer/)
+- **Video Screencast**: 
+
+---
+
 ## Team
 
 | Student | Responsibilities |

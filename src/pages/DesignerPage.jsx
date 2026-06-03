@@ -1,44 +1,42 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import useStore from '../store/useStore'
 import RoomConfig from '../components/Room/RoomConfig'
-import StyleSelection from '../components/Room/StyleSelection'
-import PaletteSelection from '../components/Room/PaletteSelection'
-import BudgetFilter from '../components/Furniture/BudgetFilter'
-import FurnitureSuggestions from '../components/Furniture/FurnitureSuggestions'
+import FurnitureChat from '../components/Furniture/FurnitureChat'
 import RoomCanvas from '../components/Canvas/RoomCanvas'
 import ExportPanel from '../components/Export/ExportPanel'
 import './DesignerPage.css'
 
 const STEPS = [
   { id: 0, label: 'Camera', desc: 'Dimensiuni' },
-  { id: 1, label: 'Stil', desc: 'Estetică' },
-  { id: 2, label: 'Culori', desc: 'Paletă' },
-  { id: 3, label: 'Buget', desc: 'Filtrare' },
-  { id: 4, label: 'Mobilier', desc: 'Agent 1' },
-  { id: 5, label: 'Layout', desc: 'Agent 2' },
-  { id: 6, label: 'Export', desc: 'PDF' },
+  { id: 1, label: 'Mobilier', desc: 'Chat AI' },
+  { id: 2, label: 'Layout', desc: 'Agent 2' },
+  { id: 3, label: 'Export', desc: 'PDF' },
 ]
 
 export default function DesignerPage() {
-  const { currentStep, setStep, room, selectedStyle, selectedPalettes, selectedFurniture, layout } = useStore()
+  const { currentStep, setStep, room, selectedFurniture, layout } = useStore()
+
+  // Clamp the active step to avoid out-of-bounds rendering if previous state is cached
+  const activeStep = Math.min(Math.max(0, currentStep || 0), STEPS.length - 1)
+
+  useEffect(() => {
+    if (currentStep >= STEPS.length) {
+      setStep(0)
+    }
+  }, [currentStep, setStep])
 
   const canAdvance = () => {
-    if (currentStep === 0) return room.length && room.width && room.height
-    if (currentStep === 1) return selectedStyle
-    if (currentStep === 2) return selectedPalettes.length > 0
-    if (currentStep === 4) return selectedFurniture.length > 0
-    if (currentStep === 5) return layout.length > 0
+    if (activeStep === 0) return room.length && room.width && room.height
+    if (activeStep === 1) return selectedFurniture.length > 0
+    if (activeStep === 2) return layout.length > 0
     return true
   }
 
   const stepContent = [
     <RoomConfig key={0} />,
-    <StyleSelection key={1} />,
-    <PaletteSelection key={2} />,
-    <BudgetFilter key={3} />,
-    <FurnitureSuggestions key={4} />,
-    <RoomCanvas key={5} />,
-    <ExportPanel key={6} />,
+    <FurnitureChat key={1} />,
+    <RoomCanvas key={2} />,
+    <ExportPanel key={3} />,
   ]
 
   return (
@@ -49,10 +47,10 @@ export default function DesignerPage() {
           {STEPS.map(s => (
             <button
               key={s.id}
-              className={`step-item ${currentStep === s.id ? 'active' : ''} ${currentStep > s.id ? 'done' : ''}`}
-              onClick={() => currentStep > s.id && setStep(s.id)}
+              className={`step-item ${activeStep === s.id ? 'active' : ''} ${activeStep > s.id ? 'done' : ''}`}
+              onClick={() => activeStep > s.id && setStep(s.id)}
             >
-              <span className="step-dot">{currentStep > s.id ? '✓' : s.id + 1}</span>
+              <span className="step-dot">{activeStep > s.id ? '✓' : s.id + 1}</span>
               <span className="step-info">
                 <strong>{s.label}</strong>
                 <em>{s.desc}</em>
@@ -63,19 +61,19 @@ export default function DesignerPage() {
       </div>
 
       <div className="designer-content">
-        <div className="step-content fade-in" key={currentStep}>
-          {stepContent[currentStep]}
+        <div className="step-content fade-in" key={activeStep}>
+          {stepContent[activeStep]}
         </div>
         <div className="step-footer">
-          {currentStep > 0 && (
-            <button className="btn btn-ghost" onClick={() => setStep(currentStep - 1)}>
+          {activeStep > 0 && (
+            <button className="btn btn-ghost" onClick={() => setStep(activeStep - 1)}>
               ← Înapoi
             </button>
           )}
-          {currentStep < STEPS.length - 1 && (
+          {activeStep < STEPS.length - 1 && (
             <button
               className="btn btn-primary"
-              onClick={() => setStep(currentStep + 1)}
+              onClick={() => setStep(activeStep + 1)}
               disabled={!canAdvance()}
             >
               Continuă →

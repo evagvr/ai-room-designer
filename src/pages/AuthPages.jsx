@@ -10,15 +10,14 @@ export function LoginPage() {
     const { login } = useStore()
     const navigate = useNavigate()
 
-    const handleLogin = () => {
-        if (!email || !pass) { setError('Completează toate câmpurile.'); return }
-        if (pass.length < 8) { setError('Parola trebuie să aibă minim 8 caractere.'); return }
-        const users = JSON.parse(localStorage.getItem('atelier_users') || '[]')
-        const u = users.find(u => u.email === email && u.pass === pass)
-        if (!u) { setError('Email sau parolă incorectă.'); return }
-        login(email)
-        navigate('/dashboard')
+    const handleLogin = async () => {
+    try {
+      await login(email, pass)  
+      navigate('/designer')
+    } catch (err) {
+      setError(err.message)
     }
+  }
 
     return (
         <div className="auth-page">
@@ -55,17 +54,14 @@ export function RegisterPage() {
     const { register } = useStore()
     const navigate = useNavigate()
 
-    const handleRegister = () => {
-        if (!email || !pass) { setError('Completează toate câmpurile.'); return }
-        if (pass.length < 8) { setError('Parola trebuie să aibă minim 8 caractere.'); return }
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('Email invalid.'); return }
-        const users = JSON.parse(localStorage.getItem('atelier_users') || '[]')
-        if (users.find(u => u.email === email)) { setError('Email deja înregistrat.'); return }
-        users.push({ email, pass })
-        localStorage.setItem('atelier_users', JSON.stringify(users))
-        register(email)
-        navigate('/dashboard')
+    const handleRegister = async () => {
+    try {
+      await register(email, pass)   
+      navigate('/designer')
+    } catch (err) {
+      setError(err.message)
     }
+  }
 
     return (
         <div className="auth-page">
