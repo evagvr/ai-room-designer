@@ -30,6 +30,69 @@
 }
 .legend-dot { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
 .legend-pos { margin-left: auto; font-family: monospace; font-size: 10px; color: var(--text-dim); }
+/* Luxury styling for run buttons */
+.run-btn {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 8px 18px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+/* Primary generate layout button: Gold & Dark theme */
+.run-btn.primary-gold {
+  background: var(--accent);
+  color: var(--bg);
+  box-shadow: 0 4px 12px rgba(201, 169, 110, 0.15);
+}
+.run-btn.primary-gold:hover {
+  background: #E5C384;
+  box-shadow: 0 6px 18px rgba(201, 169, 110, 0.25);
+  transform: translateY(-1.5px);
+}
+.run-btn.primary-gold:active {
+  transform: translateY(0);
+}
+
+/* Reset button: sleek dark luxury ghost button */
+.run-btn.reset-luxury {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.run-btn.reset-luxury:hover {
+  border-color: var(--danger);
+  color: #ff8b80;
+  background: rgba(192, 84, 75, 0.04);
+}
+
+/* Alternative placement button: Amber/Gold outline with glow on hover */
+.run-btn.new-placement-luxury {
+  background: rgba(201, 169, 110, 0.06);
+  color: var(--accent);
+  border: 1px solid rgba(201, 169, 110, 0.3);
+  box-shadow: 0 2px 8px rgba(201, 169, 110, 0.05);
+}
+.run-btn.new-placement-luxury:hover {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+  box-shadow: 0 4px 14px rgba(201, 169, 110, 0.25);
+  transform: translateY(-1.5px);
+}
+.run-btn.new-placement-luxury:active {
+  transform: translateY(0);
+}
+
 @media (max-width: 700px) {
   .canvas-layout { flex-direction: column; }
   .canvas-legend { width: 100%; }
