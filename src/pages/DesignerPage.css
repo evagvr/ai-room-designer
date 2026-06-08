@@ -132,3 +132,112 @@
   .step-content { padding: 24px 16px; }
   .step-footer { padding: 16px; }
 }
+
+/* ── Buton "Cameră Nouă" în sidebar ─────────────────── */
+.sidebar-new-room {
+  margin-top: auto;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-light);
+  margin-top: 32px;
+}
+
+.btn-new-room {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  border: 1px dashed var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  letter-spacing: 0.02em;
+}
+
+.btn-new-room:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.btn-new-room-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* ── btn-accent (folosit în footer la pasul Export) ──── */
+.btn.btn-accent {
+  background: color-mix(in srgb, var(--accent-2) 15%, transparent);
+  color: var(--accent-2);
+  border: 1px solid var(--accent-2);
+}
+
+.btn.btn-accent:hover {
+  background: var(--accent-2);
+  color: var(--bg);
+}
+
+/* ── Dialog de confirmare ─────────────────────────────── */
+.new-room-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.15s ease;
+}
+
+.new-room-dialog {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) * 2);
+  padding: 40px 36px;
+  max-width: 380px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+  animation: slideUp 0.2s ease;
+}
+
+.new-room-dialog-icon {
+  font-size: 40px;
+  margin-bottom: 16px;
+}
+
+.new-room-dialog h3 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.new-room-dialog p {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.new-room-dialog-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(12px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

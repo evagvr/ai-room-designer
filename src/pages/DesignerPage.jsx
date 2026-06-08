@@ -14,7 +14,8 @@ const STEPS = [
 ]
 
 export default function DesignerPage() {
-  const { currentStep, setStep, room, selectedFurniture, layout } = useStore()
+  const { currentStep, setStep, room, selectedFurniture, layout, resetRoom } = useStore()
+  const [showConfirm, setShowConfirm] = useState(false)
 
   // Clamp the active step to avoid out-of-bounds rendering if previous state is cached
   const activeStep = Math.min(Math.max(0, currentStep || 0), STEPS.length - 1)
@@ -32,6 +33,15 @@ export default function DesignerPage() {
     return true
   }
 
+  const handleNewRoom = () => {
+    setShowConfirm(true)
+  }
+
+  const handleConfirmNewRoom = () => {
+    resetRoom()
+    setShowConfirm(false)
+  }
+
   const stepContent = [
     <RoomConfig key={0} />,
     <FurnitureChat key={1} />,
@@ -41,6 +51,24 @@ export default function DesignerPage() {
 
   return (
     <div className="designer-page">
+      {showConfirm && (
+        <div className="new-room-overlay" onClick={() => setShowConfirm(false)}>
+          <div className="new-room-dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="new-room-dialog-icon">🔄</div>
+            <h3>Cameră nouă?</h3>
+            <p>Progresul curent va fi șters. Camerele salvate rămân intacte.</p>
+            <div className="new-room-dialog-actions">
+              <button className="btn btn-ghost" onClick={() => setShowConfirm(false)}>
+                Anulează
+              </button>
+              <button className="btn btn-primary" onClick={handleConfirmNewRoom}>
+                Da, cameră nouă
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="designer-sidebar">
         <h2 className="designer-title">Proiectare cameră</h2>
         <nav className="step-nav">
@@ -58,6 +86,13 @@ export default function DesignerPage() {
             </button>
           ))}
         </nav>
+
+        <div className="sidebar-new-room">
+          <button className="btn-new-room" onClick={handleNewRoom}>
+            <span className="btn-new-room-icon">＋</span>
+            Cameră nouă
+          </button>
+        </div>
       </div>
 
       <div className="designer-content">
@@ -77,6 +112,11 @@ export default function DesignerPage() {
               disabled={!canAdvance()}
             >
               Continuă →
+            </button>
+          )}
+          {activeStep === STEPS.length - 1 && (
+            <button className="btn btn-accent" onClick={handleNewRoom}>
+              ＋ Cameră nouă
             </button>
           )}
         </div>

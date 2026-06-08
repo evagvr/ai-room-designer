@@ -268,6 +268,21 @@ const useStore = create(
       // Navigare pași
       currentStep: 0,
       setStep: (step) => set({ currentStep: step }),
+
+      // Resetare cameră nouă
+      resetRoom: () =>
+        set({
+          room: { length: '', width: '', height: '' },
+          selectedStyle: null,
+          selectedPalettes: [],
+          maxBudget: '',
+          furnitureSuggestions: [],
+          selectedFurniture: [],
+          layout: [],
+          layoutVariants: [],
+          activeVariant: 0,
+          currentStep: 0,
+        }),
     }),
     {
       name: 'interior-designer-storage',
