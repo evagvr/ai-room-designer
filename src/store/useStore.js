@@ -1,9 +1,95 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
-const useStore = create((set) => ({
-  // Room config
-    room: { length: '', width: '', height: '' },
-    setRoom: (room) => set({ room }),
-}))
+const useStore = create(
+  persist(
+    (set, get) => ({
+      user: null,
+      isAuthenticated: false,
+
+      login: (email) =>
+        set({
+          user: { email, id: Date.now() },
+          isAuthenticated: true,
+        }),
+
+      logout: () =>
+        set({
+          user: null,
+          isAuthenticated: false,
+        }),
+
+      register: (email) =>
+        set({
+          user: { email, id: Date.now() },
+          isAuthenticated: true,
+        }),
+
+      room: { length: '', width: '', height: '' },
+      setRoom: (room) => set({ room }),
+
+      savedRooms: [],
+
+      saveRoom: (name) =>
+        set((state) => ({
+          savedRooms: [
+            ...state.savedRooms,
+            {
+              id: Date.now(),
+              name: name || `Room ${state.savedRooms.length + 1}`,
+              config: state.room,
+            },
+          ],
+        })),
+
+      deleteRoom: (id) =>
+        set((state) => ({
+          savedRooms: state.savedRooms.filter((r) => r.id !== id),
+        })),
+
+      renameRoom: (id, newName) =>
+        set((state) => ({
+          savedRooms: state.savedRooms.map((r) =>
+            r.id === id ? { ...r, name: newName } : r
+          ),
+        })),
+
+      loadRoom: (id) =>
+        set((state) => {
+          const room = state.savedRooms.find((r) => r.id === id)
+          return room ? { room: room.config } : {}
+        }),
+
+      layout: [],
+      setLayout: (layout) => set({ layout }),
+
+      layoutVariants: [],
+      setLayoutVariants: (variants) =>
+        set({ layoutVariants: variants }),
+
+      activeVariant: 0,
+      setActiveVariant: (i) => set({ activeVariant: i }),
+
+      furnitureSuggestions: [],
+      setFurnitureSuggestions: (items) =>
+        set({ furnitureSuggestions: items }),
+
+      selectedFurniture: [],
+      toggleFurnitureItem: (id) =>
+        set((state) => ({
+          selectedFurniture: state.selectedFurniture.includes(id)
+            ? state.selectedFurniture.filter((i) => i !== id)
+            : [...state.selectedFurniture, id],
+        })),
+    }),
+    {
+      name: 'interior-designer-storage',
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+      }),
+    }
+  )
+)
 
 export default useStore
