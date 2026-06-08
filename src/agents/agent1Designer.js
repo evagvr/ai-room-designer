@@ -112,7 +112,7 @@ export async function runAgent1({ room, style, palettes, maxBudget }) {
 
     const data = await response.json()
 
-    if (!response.ok) {
+    if (response.ok === false) {
       return filterFromCatalog(room, style, maxBudget)
     }
 
