@@ -40,6 +40,10 @@ export default function ExportPanel() {
   const { room, selectedStyle, selectedPalettes, furnitureSuggestions, selectedFurniture, layout, maxBudget, isAuthenticated, saveRoom } = useStore()
   const [exportMsg, setExportMsg] = useState('')
   const [saveMsg, setSaveMsg] = useState('')
+
+  const [showSaveInput, setShowSaveInput] = useState(false)
+  const [saveName, setSaveName] = useState('Camera mea')
+
   const canvasRef = useRef(null)
 
   const selItems = furnitureSuggestions.filter(f => selectedFurniture.includes(f.id))
@@ -297,12 +301,18 @@ export default function ExportPanel() {
   }
 
   const handleSave = () => {
-    const name = window.prompt('Numele proiectului:', 'Camera mea')
-    if (name) {
-      saveRoom(name)
-      setSaveMsg('✓ Proiectul a fost salvat în "Camerele mele"!')
-    }
+  setShowSaveInput(true)
+  setSaveMsg('')
   }
+
+  const handleConfirmSave = () => {
+    const name = saveName.trim()
+    if (!name) return
+    saveRoom(name)
+    setShowSaveInput(false)
+    setSaveMsg('✓ Proiectul a fost salvat în "Camerele mele"!')
+  }
+
 
   return (
     <div className="export-panel">
@@ -354,9 +364,30 @@ export default function ExportPanel() {
           ⬇ Export Plan (PDF)
         </button>
         {isAuthenticated ? (
-          <button className="btn btn-ghost" onClick={handleSave}>
-            ◆ Salvează proiectul
-          </button>
+          <>
+              <button className="btn btn-ghost" onClick={handleSave}>
+                ◆ Salvează proiectul
+              </button>
+              {showSaveInput && (
+                <div className="save-input-row">
+                  <input
+                    className="save-name-input"
+                    type="text"
+                    value={saveName}
+                    onChange={(e) => setSaveName(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleConfirmSave()}
+                    placeholder="Numele proiectului"
+                    autoFocus
+                  />
+                  <button className="btn btn-primary" onClick={handleConfirmSave}>
+                    Salvează
+                  </button>
+                  <button className="btn btn-ghost" onClick={() => setShowSaveInput(false)}>
+                    Anulează
+                  </button>
+                </div>
+              )}
+          </>
         ) : (
           <a href="/login" className="btn btn-ghost">
             Autentifică-te pentru a salva
