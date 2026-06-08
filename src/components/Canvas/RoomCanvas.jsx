@@ -269,7 +269,7 @@ export default function RoomCanvas() {
               <div key={item.id} className="legend-item">
                 <div className="legend-dot" style={{ background: cols.has(item.id) ? 'var(--danger)' : item.color || '#888' }} />
                 <span>{item.name}</span>
-                <span className="legend-pos">{item.x.toFixed(1)},{item.y.toFixed(1)}</span>
+                <span className="legend-pos">x:{item.x.toFixed(1)} y:{item.y.toFixed(1)}</span>
               </div>
             ))}
           </div>
