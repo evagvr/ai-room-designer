@@ -351,7 +351,7 @@ Development followed a structured division: **70% AI Execution (repetitive boile
 ## Demo
 
 - **Live Application**: [https://evagvr.github.io/ai-room-designer/](https://evagvr.github.io/ai-room-designer/)
-- **Video Screencast**: 
+- **Video Screencast**: [https://youtu.be/l7RsiIhhnlA](https://youtu.be/l7RsiIhhnlA)
 
 ---
 
