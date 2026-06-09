@@ -228,9 +228,9 @@ npm run test:watch
 
 | File | Tests | Coverage Area |
 |------|-------|---------------|
-| `tests/agent1.test.js` | 7 | API mock, fallback generation, required fields, store links, boundary compliance, budget constraint |
-| `tests/agent2.test.js` | 11 | Layout generation, boundary clamping, rotation validation, `checkCollisions()` — 5 cases |
-| `tests/store.test.js` | 11 | Room dimension validation, area/volume calculation, furniture toggle, auth validation, 3 agent evals |
+| `tests/agent1.test.js` | 7 | Network error fallback, malformed JSON fallback, dimension compliance, required fields validation, store link validation, parsed API data verification, budget constraint enforcement |
+| `tests/agent2.test.js` | 11 | Fallback layout generation, coordinate presence validation, boundary clamping checks, API response parsing, rotation value validation, empty state handling, overlap detection (`checkCollisions()`) — 5 test cases |
+| `tests/store.test.js` | 11 | Dimension validation boundaries, area calculation, volume calculation, budget summation, over-budget detection, furniture toggling, email regex validation, password length validation, Agent 1 prompt extraction, Agent 2 constraint checking, item dimension compliance |
 
 ### AI Agent Evaluations (`tests/store.test.js`)
 We use programmatic assertions during CI/CD to validate that the output produced by the AI agents satisfies strict physical rules:
