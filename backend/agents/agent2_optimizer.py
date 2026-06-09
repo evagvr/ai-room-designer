@@ -67,10 +67,14 @@ def _fits_in_room(x, y, w, d, room: dict) -> bool:
     return (ROOM_MARGIN - 1e-5) <= x and (ROOM_MARGIN - 1e-5) <= y and (x + w) <= (rl - ROOM_MARGIN + 1e-5) and (y + d) <= (rw - ROOM_MARGIN + 1e-5)
 
 
-def _sort_items(items: list, variant: int) -> list:
+def _sort_items(items: list, variant: int, optimizer_hints: dict = None) -> list:
+    pref_seq = optimizer_hints.get('preferred_sequence', []) if optimizer_hints else []
+    priority_map = {cat: idx for idx, cat in enumerate(pref_seq)}
+
     def key(it):
         cat = it.get('category') or 'decor'
-        return (CATEGORY_PLACE_ORDER.get(cat, 9), -_item_area(it))
+        pref_idx = priority_map.get(cat, CATEGORY_PLACE_ORDER.get(cat, 9) + len(pref_seq))
+        return (pref_idx, -_item_area(it))
 
     ordered = sorted(items, key=key)
     if variant % 2 == 1:
@@ -126,7 +130,7 @@ def _collect_candidate_positions(w: float, d: float, placed: list, room: dict, v
     return unique_candidates
 
 
-def _score_free_position(x: float, y: float, w: float, d: float, placed: list, room: dict, item: dict, variant: int) -> float:
+def _score_free_position(x: float, y: float, w: float, d: float, placed: list, room: dict, item: dict, variant: int, optimizer_hints: dict = None) -> float:
     rl = _f(room['length'], 5)
     rw = _f(room['width'], 4)
     cx = x + w / 2
@@ -162,6 +166,44 @@ def _score_free_position(x: float, y: float, w: float, d: float, placed: list, r
     dist_bottom = (rw - ROOM_MARGIN - d) - y
     min_dist_wall = min(max(0.0, dist_left), max(0.0, dist_right), max(0.0, dist_top), max(0.0, dist_bottom))
 
+    # Aplica hints de la Mistral
+    if optimizer_hints:
+        wall_cats = optimizer_hints.get('wall_bound_categories', [])
+        center_cats = optimizer_hints.get('center_bound_categories', [])
+        pairings = optimizer_hints.get('pairings', [])
+
+        # Categorii lipite de perete
+        if cat in wall_cats:
+            score -= min_dist_wall * 5.0
+
+        # Categorii centrate
+        if cat in center_cats:
+            cx_room = rl / 2
+            cy_room = rw / 2
+            dist_to_center = math.hypot(cx - cx_room, cy - cy_room)
+            score -= dist_to_center * 5.0
+
+        # Perechi de elemente (ex: lampă lângă canapea)
+        for pair in pairings:
+            a = pair.get('a')
+            b = pair.get('b')
+            if cat == a:
+                for p in placed:
+                    if p.get('category') == b:
+                        pw, pd = _effective_dims(p, p.get('rotation', 0))
+                        pcx = _f(p['x']) + pw / 2
+                        pcy = _f(p['y']) + pd / 2
+                        d_pair = math.hypot(cx - pcx, cy - pcy)
+                        score += 8.0 / (d_pair + 0.1)
+            elif cat == b:
+                for p in placed:
+                    if p.get('category') == a:
+                        pw, pd = _effective_dims(p, p.get('rotation', 0))
+                        pcx = _f(p['x']) + pw / 2
+                        pcy = _f(p['y']) + pd / 2
+                        d_pair = math.hypot(cx - pcx, cy - pcy)
+                        score += 8.0 / (d_pair + 0.1)
+
     if bias_type == 0:
         # Bias Top-Left
         score -= (x * 0.3 + y * 0.3)
@@ -175,23 +217,23 @@ def _score_free_position(x: float, y: float, w: float, d: float, placed: list, r
         # Bias Bottom-Left
         score -= (x * 0.3 + (rw - d - y) * 0.3)
     elif bias_type == 4:
-        # Spaced-out / Distribute-wide: no coordinate bias, purely spacing and walls
+        # Spaced-out / Distribute-wide
         pass
     elif bias_type == 5:
-        # Perimeter / Wall-bound: favor being near walls for large items, but not coffee tables
+        # Perimeter / Wall-bound
         cat_name = item.get('category', '')
         item_name = item.get('name', '').lower()
         if cat_name != 'table' or 'cafe' not in item_name:
             score -= min_dist_wall * 1.5
     elif bias_type == 6:
-        # Alternating corners: even index to Top-Left, odd index to Bottom-Right
+        # Alternating corners
         idx = len(placed)
         if idx % 2 == 0:
             score -= (x * 0.3 + y * 0.3)
         else:
             score -= ((rl - w - x) * 0.3 + (rw - d - y) * 0.3)
     elif bias_type == 7:
-        # Center-focused / Cozy grouping
+        # Center-focused
         cx_room = rl / 2
         cy_room = rw / 2
         score -= math.hypot(cx - cx_room, cy - cy_room) * 0.4
@@ -199,7 +241,7 @@ def _score_free_position(x: float, y: float, w: float, d: float, placed: list, r
     return score
 
 
-def _find_best_position(item: dict, placed: list, room: dict, variant: int, force_gap: float = MIN_GAP) -> dict | None:
+def _find_best_position(item: dict, placed: list, room: dict, variant: int, force_gap: float = MIN_GAP, optimizer_hints: dict = None) -> dict | None:
     best_entry = None
     best_score = -1e18
 
@@ -215,7 +257,7 @@ def _find_best_position(item: dict, placed: list, room: dict, variant: int, forc
             if _collides(x, y, w, d, placed, force_gap):
                 continue
 
-            s = _score_free_position(x, y, w, d, placed, room, item, variant)
+            s = _score_free_position(x, y, w, d, placed, room, item, variant, optimizer_hints)
             if s > best_score:
                 best_score = s
                 best_entry = {
@@ -229,16 +271,16 @@ def _find_best_position(item: dict, placed: list, room: dict, variant: int, forc
     return best_entry
 
 
-def _pack_spatial_free(items: list, room: dict, variant: int = 0) -> list:
+def _pack_spatial_free(items: list, room: dict, variant: int = 0, force_gap: float = MIN_GAP, optimizer_hints: dict = None) -> list:
     placed: list[dict] = []
     rl = _f(room['length'], 5)
     rw = _f(room['width'], 4)
 
-    for idx, item in enumerate(_sort_items(items, variant)):
-        entry = _find_best_position(item, placed, room, variant, MIN_GAP)
+    for idx, item in enumerate(_sort_items(items, variant, optimizer_hints)):
+        entry = _find_best_position(item, placed, room, variant, force_gap, optimizer_hints)
 
         if not entry:
-            entry = _find_best_position(item, placed, room, variant, 0.01)
+            entry = _find_best_position(item, placed, room, variant, 0.01, optimizer_hints)
 
         if not entry:
             w, d = _effective_dims(item, 0)
@@ -275,7 +317,7 @@ def _pack_spatial_free(items: list, room: dict, variant: int = 0) -> list:
     return placed
 
 
-def _finalize_layout(layout: list, room: dict) -> list:
+def _finalize_layout(layout: list, room: dict, force_gap: float = MIN_GAP, optimizer_hints: dict = None) -> list:
     seen = set()
     unique = []
     for item in layout:
@@ -298,9 +340,9 @@ def _finalize_layout(layout: list, room: dict) -> list:
                 continue
             others = [p for j, p in enumerate(unique) if j != idx]
 
-            moved = _find_best_position(item, others, room, pass_idx, 0.01)
+            moved = _find_best_position(item, others, room, pass_idx, 0.01, optimizer_hints)
             if not moved:
-                moved = _find_best_position(item, others, room, pass_idx + 1, 0.0)
+                moved = _find_best_position(item, others, room, pass_idx + 1, 0.0, optimizer_hints)
 
             if not moved:
                 w, d = _effective_dims(item, item.get('rotation', 0))
@@ -335,12 +377,85 @@ def run_agent2(room, selected_items, variant=0):
     if not items:
         return []
 
-    # Directly generate the layout for the specific strategy index `variant`.
-    # This guarantees that each variant (0 to 7) uses a completely distinct
-    # spatial placement bias (Top-Left, Bottom-Right, Top-Right, Bottom-Left,
-    # Spaced-out, Perimeter/Wall-bound, Alternating corners, Center-focused)
-    # and returns uniquely different configurations to the user.
-    layout = _finalize_layout(_pack_spatial_free(items, room_f, variant), room_f)
+    # Import singleton-ul Ollama
+    from .ollama_service import ollama
+
+    # Determinăm datele contextuale ale camerei
+    room_type = "living_room"
+    if any(it.get('category') == 'bed' for it in items):
+        room_type = "bedroom"
+    elif any('birou' in it.get('name', '').lower() for it in items):
+        room_type = "office"
+
+    detected_style = items[0].get('style', 'modern') if items else 'modern'
+    windows = room.get('windows', [{'wall': 'North', 'width': 1.5, 'position': 2.0}])
+    doors = room.get('doors', [{'wall': 'South', 'width': 0.9, 'position': 0.5}])
+
+    layout_recommendations = None
+    try:
+        SYSTEM_PROMPT = (
+            "Ești un asistent AI expert în design interior și optimizare spațială.\n"
+            "Analizează specificațiile camerei, mobilierul disponibil și locația ușilor/ferestrelor pentru a sugera o strategie de amenajare.\n"
+            "Trebuie să returnezi EXCLUSIV un obiect JSON valid, fără alte explicații sau text introductiv/concluziv.\n\n"
+            "Structura JSON-ului returnat trebuie să fie exact următoarea:\n"
+            "{\n"
+            "  \"design_strategy\": \"strategie descrisă pe scurt (ex: maximize natural light)\",\n"
+            "  \"focal_point\": \"seating\" sau \"bed\" sau \"table\" sau \"storage\",\n"
+            "  \"placement_rules\": [\n"
+            "    \"place sofa facing TV\",\n"
+            "    \"keep walking path clear\",\n"
+            "    \"place lamp near sofa\"\n"
+            "  ],\n"
+            "  \"style_consistency\": [\n"
+            "    \"use wood accents\",\n"
+            "    \"maintain neutral palette\"\n"
+            "  ],\n"
+            "  \"optimizer_hints\": {\n"
+            "    \"preferred_sequence\": [\"bed\", \"seating\", \"table\", \"storage\", \"lighting\", \"decor\"],\n"
+            "    \"wall_bound_categories\": [\"bed\", \"storage\"],\n"
+            "    \"center_bound_categories\": [\"table\"],\n"
+            "    \"spacing_factor\": 1.2,\n"
+            "    \"pairings\": [\n"
+            "      {\"a\": \"lighting\", \"b\": \"seating\"},\n"
+            "      {\"a\": \"table\", \"b\": \"seating\"}\n"
+            "    ]\n"
+            "  }\n"
+            "}\n"
+        )
+
+        user_prompt = (
+            f"Specificații Cameră:\n"
+            f"- Dimensiuni: {room_f['length']}m lungime x {room_f['width']}m lățime x {room_f['height']}m înălțime\n"
+            f"- Tip Cameră: {room_type}\n"
+            f"- Stil Detectat: {detected_style}\n"
+            f"- Poziție Ferestre: {windows}\n"
+            f"- Poziție Uși: {doors}\n\n"
+            f"Mobilier de plasat:\n"
+        )
+        for it in items:
+            user_prompt += f"- {it.get('name')} (Categorie: {it.get('category')}, Dimensiuni: {it.get('width')}x{it.get('depth')}m)\n"
+
+        user_prompt += "\nGenerează strategia de design și hints pentru optimizator sub forma JSON specificată."
+
+        raw_response = ollama.chat(SYSTEM_PROMPT, user_prompt, temperature=0.1)
+        layout_recommendations = ollama.extract_json(raw_response)
+        logger.info(f"[Agent 2 Mistral Recommendations] {layout_recommendations}")
+    except Exception as e:
+        logger.warning(f"Apelul Mistral în Agent 2 a eșuat sau a expirat: {e}. Folosim fallback determinist.")
+
+    optimizer_hints = None
+    gap_factor = 1.0
+    if layout_recommendations:
+        optimizer_hints = layout_recommendations.get('optimizer_hints', {})
+        try:
+            gap_factor = float(optimizer_hints.get('spacing_factor', 1.0))
+        except (ValueError, TypeError):
+            pass
+
+    gap = MIN_GAP * gap_factor
+
+    # Generăm layout-ul aplicând hints-urile de la Mistral
+    layout = _finalize_layout(_pack_spatial_free(items, room_f, variant, gap, optimizer_hints), room_f, gap, optimizer_hints)
     return layout
 
 
