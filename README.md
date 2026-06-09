@@ -22,12 +22,10 @@
 - [Testing & Evaluations](#testing--evaluations)
 - [CI/CD Pipeline](#cicd-pipeline)
 - [Backlog](#backlog)
-- [Definition of Done](#definition-of-done)
 - [Diagrams](#diagrams)
 - [Bug Reports & Pull Requests](#bug-reports--pull-requests)
 - [AI Usage in Development](#ai-usage-in-development)
 - [Demo](#demo)
-- [Team](#team)
 
 ---
 
@@ -47,7 +45,7 @@ AI tooling was extensively integrated across the entire software development lif
 The interface is consolidated into a highly intuitive, step-by-step design pipeline:
 1.  **Camera (Dimensions)**: Configures room length, width, and height in meters. Live floor area ($m^2$) and volume ($m^3$) are calculated instantly on the sidebar alongside a proportional wall boundary preview.
 2.  **Mobilier (Chat AI)**: A chat interface where users converse with the **Designer Agent** (Agent 1). The agent automatically queries the SQLite database to suggest real-market furniture matching the style and budget, rendering interactive product selection cards.
-3.  **Layout (Room Canvas)**: Computes and displays the spatial arrangement of the chosen items. Includes an interactive 2D canvas with full drag-and-drop, collision highlighting, and a premium control dock (`🔀 Așezare nouă`).
+3.  **Layout (Room Canvas)**: Computes and displays the spatial arrangement of the chosen items. Includes an interactive 2D canvas with full drag-and-drop, collision highlighting, and a premium control dock (`Așezare nouă`).
 4.  **Export (PDF & Save)**: Shows a read-only blueprint next to a purchase list and provides an automated PDF report download along with a CRUD project saving dashboard.
 
 ### Real-Time Collision-Free Layout Algorithm
@@ -56,7 +54,7 @@ The interface is consolidated into a highly intuitive, step-by-step design pipel
 - Features **global auto-repositioning** on product additions: large structural items (like beds or sofas) are sorted and placed first to optimize room utilization, followed by smaller items.
 - Features real-time visual overlap checks, highlighting colliding items in warning red.
 
-### Premium Control Dock (`🔀 Așezare nouă`)
+### Premium Control Dock (`Așezare nouă`)
 - A glassmorphic design action panel employing semi-transparent gold borders, Bezier morph transitions, and physical lift glow-shadows.
 - Allows users to cycle through **8 distinct layout strategies** calculated by the Spatial Optimizer backend (Corner-biased, Wall-bound/Perimeter, Wide-spaced, Cozy center grouping, etc.) to guarantee 100% unique, diverse, and collision-free spatial variations.
 
@@ -230,9 +228,9 @@ npm run test:watch
 
 | File | Tests | Coverage Area |
 |------|-------|---------------|
-| `tests/agent1.test.js` | 7 | API mock, fallback generation, required fields, store links, boundary compliance, budget constraint |
-| `tests/agent2.test.js` | 11 | Layout generation, boundary clamping, rotation validation, `checkCollisions()` — 5 cases |
-| `tests/store.test.js` | 11 | Room dimension validation, area/volume calculation, furniture toggle, auth validation, 3 agent evals |
+| `tests/agent1.test.js` | 7 | Network error fallback, malformed JSON fallback, dimension compliance, required fields validation, store link validation, parsed API data verification, budget constraint enforcement |
+| `tests/agent2.test.js` | 11 | Fallback layout generation, coordinate presence validation, boundary clamping checks, API response parsing, rotation value validation, empty state handling, overlap detection (`checkCollisions()`) — 5 test cases |
+| `tests/store.test.js` | 11 | Dimension validation boundaries, area calculation, volume calculation, budget summation, over-budget detection, furniture toggling, email regex validation, password length validation, Agent 1 prompt extraction, Agent 2 constraint checking, item dimension compliance |
 
 ### AI Agent Evaluations (`tests/store.test.js`)
 We use programmatic assertions during CI/CD to validate that the output produced by the AI agents satisfies strict physical rules:
@@ -320,42 +318,23 @@ Deploy to GitHub Pages  (push to main only)
 
 ---
 
-## Definition of Done
-
-A feature is considered **Done** only when:
-1.  **Code Quality**: The code conforms to modern ESLint rules; no hardcoded credentials or API keys are present.
-2.  **Responsiveness**: The visual component scales perfectly across desktop, tablet, and mobile layouts.
-3.  **Local AI Compatibility**: Verified that the Ollama prompt yields correctly formatted structured JSON with Mistral.
-4.  **Green Tests**: All Vitest test suites (29/29) run and pass successfully.
-5.  **CI/CD Pipeline**: GitHub Actions runs the entire build and testing pipeline to completion with no warnings.
-6.  **Documentation**: `walkthrough.md`, `task.md` and this `README.md` are updated to reflect the new state.
-
----
 
 ## Diagrams
 
 
 | Diagram | Description |
 |---------|-------------|
-| Component Architecture | High-level map of React components, Zustand store, agents, and Anthropic API |
-| Agent 1 Workflow | Input → prompt construction → Claude API → JSON parse → fallback |
-| Agent 2 Workflow | Input → constraint prompt → Claude API → coordinate clamp → canvas render |
-| Sequence Diagram | Full user flow: room config → furniture generation → layout → export |
-| State Schema | Complete Zustand store structure with field types and persistence boundaries |
+| Component Architecture | High-level map of React components (DesignerPage, RoomCanvas), Zustand store (localStorage), Django REST Backend, and Ollama health check. |
+| Agent 1 Workflow | Input (style, budget) → SQLite query on `FURNITURE_FURNITUREPRODUCT` → heuristic intent extractor → frontend client fallback. |
+| Agent 2 Workflow | Input (items, variant 0–7) → geometric layout calculation (`variant % 8`) → `check_collisions()` validation → coordinate update → canvas render. |
+| Sequence Diagram | Full user flow: login → furniture search (heuristics) → layout generation (Agent 2) → jsPDF export → Zustand persistence. |
+| State Schema | Complete Zustand store structure (`LOCAL_STORAGE_SESSION`) including user, `isAuthenticated`, and `savedRooms` (`LAYOUT_ITEM_STRUCTURE`). |
 
 ---
 
 ## Bug Reports & Pull Requests
 
 All bugs are tracked as GitHub Issues and resolved via dedicated bug-fix branches and Pull Requests. Each PR references the respective issue it resolves and must successfully pass the entire automated CI pipeline (Vitest unit tests, agent evaluations, and production build checks) before it is allowed to merge.
-
-A concrete example of our bug-tracking and resolution process is documented below. The full, historical record of all issues is available directly within our repository's Issues and Pull Requests tabs.
-
-### Bug ID #003: Variant Repetition in Spatial Optimizer (Agent 2 Layouts)
-- **Description**: Clicking the `🔀 Așezare nouă` button updated the frontend variant index successfully, but Agent 2 returned identical coordinate placements for variant 2 onwards, failing to produce alternative arrangements.
-- **Diagnosis**: The optimizer in backend `agent2_optimizer.py` ran a loop checking 16 variations and always picked the configuration with the highest spread score (`_layout_spread_score`). Since the spread score calculation is purely deterministic and strongly biases corners, all search iterations resolved to the exact same visual layout.
-- **Resolution**: Removed the redundant spread score maximization loop and mapped the frontend `variant` parameter directly to the pre-programmed quadrant/distribution strategies (`variant % 8`), guaranteeing 8 completely unique and disjoint layout configurations at every button click.
-- **Pull Request**: Submitted `feature/agent2-strategies` targeting `develop` and successfully merged.
 
 ---
 
@@ -365,7 +344,7 @@ Development followed a structured division: **70% AI Execution (repetitive boile
 
 > [!TIP]
 > **Complete AI Report**: A comprehensive, detailed report outlining our prompt engineering methodologies, workflow splits, advantages, and lessons learned is available at:  
-> 🔗 **[`docs/raport_utilizare_ai.md`](./docs/raport_utilizare_ai.md)**
+> 🔗 **[Raport Utilizare Instrumente AI - Atelier AI](./docs/Raport%20Utilizare%20Instrumente%20AI%20-%20Atelier%20AI.pdf)**> 
 
 ---
 
@@ -376,11 +355,3 @@ Development followed a structured division: **70% AI Execution (repetitive boile
 
 ---
 
-## Team
-
-| Student | Responsibilities |
-|---------|----------------|
-| Student 1 | Agent 1 (`agent1Designer.js`), `FurnitureSuggestions`, `BudgetFilter`, product database |
-| Student 2 | Agent 2 (`agent2Optimizer.js`), `RoomCanvas` (canvas, drag & drop, collision detection) |
-| Student 3 | `AuthPages`, `DashboardPage`, `ExportPanel`, Zustand store |
-| Student 4 | `StyleSelection`, `ComparePage`, CI/CD pipeline, Vitest test suite |
